@@ -1,0 +1,1117 @@
+5.	Write a program to create Dynamic Link Library for any mathematical operation and write an application program to test it. (Java Native Interface / Use VB or VC++).
+
+A dynamic-link library (DLL) is a module that
+contains functions and data that can be used by
+another module (application or DLL).
+
+• A DLL can define two kinds of functions: exported
+and internal.The exported functions are intended to
+be called by other modules, as well as from within
+the DLL where they are defined.
+
+Save more memory and reduce page switching
+(2)programs written in different programming languages can call the
+same DLL function just according to the function calling
+convention
+(3)Suitable for large-scale software development, make the
+development process independent, the coupling degree is small,
+facilitates the development and the test between different
+developer and the development organization.
+(4)Save disk space: When an application uses dynamic linking,
+multiple applications can share a single copy of the DLL on disk. In
+contrast, when an application uses a static-link library, each
+application links the library code to the executable image as a
+separate copy.
+
+TestJNI.c
+
+#include<jni.h>
+#include<stdio.h>
+#include "TestJNI.h"
+JNIEXPORT jint JNICALL Java_TestJNI_add(JNIEnv *env,jobject thisobj,jint n1,jint n2)
+{
+	
+	return(n1+n2);
+	
+}
+JNIEXPORT jint JNICALL Java_TestJNI_sub(JNIEnv *env,jobject thisobj,jint n1,jint n2)
+{
+	return(n1-n2);
+}
+JNIEXPORT jint JNICALL Java_TestJNI_mul(JNIEnv *env,jobject thisobj,jint n1,jint n2)
+{
+	return(n1*n2);	
+}
+JNIEXPORT jint JNICALL Java_TestJNI_division(JNIEnv *env,jobject thisobj,jint n1,jint n2)
+{
+	return(n1/n2);
+}
+
+
+TestJNI.java
+
+import java.util.Scanner;
+public class TestJNI
+{
+static
+{
+	System.loadLibrary("cal");
+}
+private native int add(int n1,int n2);
+private native int sub(int n1,int n2);
+private native int mul(int n1,int n2);
+private native int division(int n1,int n2);
+public static void main(String args[])
+{
+	int n1,n2;
+	TestJNI obj=new TestJNI();
+	int ch=1;
+	Scanner sc= new Scanner(System.in);
+	
+	do
+	{
+	System.out.println("1.addition");
+	System.out.println("2.subtraction");
+	System.out.println("3.multiplication");
+	System.out.println("4.division");
+	System.out.println("Please enter the choice");
+	ch=sc.nextInt();
+	if(ch>=5)
+	{
+	System.out.println("ERROR!!!");
+	System.out.println("Please enter the correct choice");
+	ch=sc.nextInt();
+	}
+	
+	System.out.println("Please enter the n1");
+	n1=sc.nextInt();
+	System.out.println("Please enter the n2");
+	n2=sc.nextInt();
+	switch(ch)
+	{
+
+	case 1:	
+	System.out.println("Addition is:"+obj.add(n1,n2));
+	break;
+	
+	case 2:
+	System.out.println("subtraction is:"+obj.sub(n1,n2));
+	break;
+	
+	case 3:
+	System.out.println("multiplication is:"+obj.mul(n1,n2));
+	break;
+
+	case 4:
+	System.out.println("division is:"+obj.division(n1,n2));
+	break;
+}
+	
+}while(ch<5);
+}
+}
+
+1.javac TestJNI.java
+2.javah -jni  TestJNI
+3.gcc -fPIC -I/usr/lib/jvm/java-8-openjdk-amd64/include -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux -o libcal.so -shared TestJNI.c
+4.java -Djava.library.path=. TestJNI
+
+
+6.	Write a program to create Dynamic Link Library for any string operation and write an application program to test it. (Java Native Interface / Use VB or VC++).
+
+hello.java
+
+public class Hello {  // Save as HelloJNI.java
+   static {
+      System.loadLibrary("ABC"); 
+   }
+ 
+   // Declare an instance native method sayHello() which receives no parameter and returns void
+   private native void sayHello();
+ 
+   // Test Driver
+   public static void main(String[] args) {
+      new Hello().sayHello();  // Create an instance and invoke the native method
+   }
+}
+
+hello.c
+
+#include <jni.h>        // JNI header provided by JDK
+#include <stdio.h>      // C Standard IO Header
+#include "Hello.h"   // Generated
+ 
+// Implementation of the native method sayHello()
+JNIEXPORT void JNICALL Java_Hello_sayHello(JNIEnv *env, jobject thisObj) {
+   printf("Hello World!\n");
+   return;
+}
+
+
+8.	Write a program to solve Classical Problems of Synchronization using Mutex/Semaphore.
+
+import java.util.concurrent.Semaphore;
+
+class RWP {
+
+    static Semaphore readLock = new Semaphore(1);
+    static Semaphore writeLock = new Semaphore(1);
+    static int readCount = 0;
+
+    static class Read implements Runnable {
+        @Override
+        public void run() {
+            try {
+                //Acquire Section
+                readLock.acquire();
+                readCount++;
+                if (readCount == 1) {
+                    writeLock.acquire();
+                }
+                readLock.release();
+
+                //Reading section
+                System.out.println("Thread "+Thread.currentThread().getName() + " is READING");
+                Thread.sleep(1500);
+                System.out.println("Thread "+Thread.currentThread().getName() + " has FINISHED READING");
+
+                //Releasing section
+                readLock.acquire();
+                readCount--;
+                if(readCount == 0) {
+                    writeLock.release();
+                }
+                readLock.release();
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    static class Write implements Runnable {
+        @Override
+        public void run() {
+            try {
+                writeLock.acquire();
+                System.out.println("Thread "+Thread.currentThread().getName() + " is WRITING");
+                Thread.sleep(2500);
+                System.out.println("Thread "+Thread.currentThread().getName() + " has finished WRITING");
+                writeLock.release();
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Read read = new Read();
+        Write write = new Write();
+        Thread t1 = new Thread(read);
+        t1.setName("thread1");
+        Thread t2 = new Thread(read);
+        t2.setName("thread2");
+        Thread t3 = new Thread(write);
+        t3.setName("thread3");
+        Thread t4 = new Thread(read);
+        t4.setName("thread4");
+        t1.start();
+        t3.start();
+        t2.start();
+        t4.start();
+    }
+}
+
+9.	Write a program to simulate CPU Scheduling Algorithms: FCFS and Round Robin (Preemptive).
+10,11,12,13,14
+
+9-14
+
+import java.util.*;
+
+class Schedule
+{
+static Scanner sc=new Scanner(System.in);
+	public static void main(String[] args)
+	{
+		
+		int choice=0;
+		do{
+			System.out.println("\n*--*--*--*--*--*--*--*--*--*--*--*--*--*--*");
+			System.out.println("Choose the Scheduling Algorithm: --->");
+			System.out.println("1. Priority Based Scheduling");
+			System.out.println("2. Round Robin");
+			System.out.println("3. Shortest-Job-First Preemtive ");
+			System.out.println("4. FCFS");		
+			System.out.println("5. Exit");
+			System.out.print("Enter Your Choice : ");
+			 choice= sc.nextInt();			
+			System.out.println("*--*--*--*--*--*--*--*--*--*--*--*--*--*--*");
+			switch(choice)
+			{
+				case 1: priority();
+					break;
+
+				case 2: rr();
+					break;
+
+				case 3: sjfp();
+					break;
+
+				case 4: fcfs();
+					break;
+
+			}
+		}while(choice!=5);
+	}
+
+
+	static void priority()
+	{
+		
+            Scanner s = new Scanner(System.in);
+            int x,n,p[],pp[],bt[],w[],t[],awt,atat,i;
+ 
+            p = new int[10];
+            pp = new int[10];
+            bt = new int[10];
+            w = new int[10];
+            t = new int[10];
+ 
+   //n is number of process
+   //p is process
+   //pp is process priority
+   //bt is process burst time
+   //w is wait time
+   // t is turnaround time
+   //awt is average waiting time
+   //atat is average turnaround time
+ 
+ 
+   System.out.print("Enter the number of process : ");
+   n = s.nextInt();
+    
+ 
+   for(i=0;i<n;i++)
+    {
+       System.out.print("\nProcess["+(i+1)+"]:");
+	System.out.print("\t Enter burst time : ");    
+  bt[i] = s.nextInt();
+System.out.print("\t time priorities :"); 
+      pp[i] = s.nextInt();
+      p[i]=i+1;
+    }
+ 
+//sorting on the basis of priority
+  for(i=0;i<n-1;i++)
+   {
+     for(int j=i+1;j<n;j++)
+     {
+       if(pp[i]>pp[j])
+       {
+     x=pp[i];
+     pp[i]=pp[j];
+     pp[j]=x;
+     x=bt[i];
+     bt[i]=bt[j];
+     bt[j]=x;
+     x=p[i];
+     p[i]=p[j];
+     p[j]=x;
+      }
+   }
+}
+w[0]=0;
+awt=0;
+t[0]=bt[0];
+atat=t[0];
+for(i=1;i<n;i++)
+ {
+   w[i]=t[i-1];
+   awt+=w[i];
+   t[i]=w[i]+bt[i];
+   atat+=t[i];
+ }
+ 
+//Displaying the process
+ 
+  System.out.print("\n\nProcess \t Burst Time \t Wait Time \t Turn Around Time   Priority \n");
+for(i=0;i<n;i++)
+  System.out.print("\n   "+p[i]+"\t\t   "+bt[i]+"\t\t     "+w[i]+"\t\t     "+t[i]+"\t\t     "+pp[i]+"\n");
+awt/=n;
+atat/=n;
+  System.out.print("\n Average Wait Time : "+awt);
+  System.out.print("\n Average Turn Around Time : "+atat);
+	}
+
+
+
+
+	static void rr()
+	{
+         Scanner s = new Scanner(System.in);
+ 
+          int wtime[],btime[],rtime[],num,quantum,total;
+ 
+          wtime = new int[10];
+          btime = new int[10];
+          rtime = new int[10];
+ 
+System.out.print("Enter number of processes(MAX 10): ");
+num = s.nextInt();
+System.out.print("Enter burst time");
+for(int i=0;i<num;i++) { System.out.print("\nP["+(i+1)+"]: "); btime[i] = s.nextInt(); rtime[i] = btime[i]; wtime[i]=0; } System.out.print("\n\nEnter quantum: "); quantum = s.nextInt(); int rp = num; int i=0; int time=0; System.out.print("0"); wtime[0]=0; while(rp!=0) { if(rtime[i]>quantum)
+ {
+   rtime[i]=rtime[i]-quantum;
+   System.out.print(" | P["+(i+1)+"] | ");
+   time+=quantum;
+   System.out.print(time);
+   }
+ else if(rtime[i]<=quantum && rtime[i]>0)
+ {time+=rtime[i];
+  rtime[i]=rtime[i]-rtime[i];
+  System.out.print(" | P["+(i+1)+"] | ");
+  rp--;
+System.out.print(time);
+ }
+
+
+ 
+i++;
+if(i==num)
+{
+i=0;
+}
+ 
+}
+	}
+
+
+
+	
+
+
+	static void sjfp()
+	{
+Scanner sc=new Scanner(System.in);
+System.out.println ("enter no of process:");
+int n= sc.nextInt();
+int pid[] = new int[n]; // it takes pid of process
+int at[] = new int[n]; // at means arrival time
+int bt[] = new int[n]; // bt means burst time
+int ct[] = new int[n]; // ct means complete time
+int ta[] = new int[n];// ta means turn around time
+int wt[] = new int[n];  // wt means waiting time
+int f[] = new int[n];  // f means it is flag it checks process is completed or not
+int k[]= new int[n];   // it is also stores brust time
+    int i, st=0, tot=0;
+    float avgwt=0, avgta=0;
+ 
+    for (i=0;i<n;i++)
+    {
+     pid[i]= i+1;
+     System.out.println ("enter process " +(i+1)+ " arrival time:");
+     at[i]= sc.nextInt();
+     System.out.println("enter process " +(i+1)+ " burst time:");
+     bt[i]= sc.nextInt();
+     k[i]= bt[i];
+     f[i]= 0;
+    }
+    
+    while(true){
+     int min=99,c=n;
+     if (tot==n)
+     break;
+    
+     for ( i=0;i<n;i++)
+     {
+     if ((at[i]<=st) && (f[i]==0) && (bt[i]<min))
+     {	
+     min=bt[i];
+     c=i;
+     }
+     }
+    
+     if (c==n)
+     st++;
+     else
+     {
+     bt[c]--;
+     st++;
+     if (bt[c]==0)
+     {
+     ct[c]= st;
+     f[c]=1;
+     tot++;
+     }
+     }
+    }
+    
+    for(i=0;i<n;i++)
+    {
+     ta[i] = ct[i] - at[i];
+     wt[i] = ta[i] - k[i];
+     avgwt+= wt[i];
+     avgta+= ta[i];
+    }
+    
+    System.out.println("pid  arrival  burst  complete turn waiting");
+    for(i=0;i<n;i++)
+    {
+     System.out.println(pid[i] +"\t"+ at[i]+"\t"+ k[i] +"\t"+ ct[i] +"\t"+ ta[i] +"\t"+ wt[i]);
+    }
+    
+    System.out.println("\naverage tat is "+ (float)(avgta/n));
+    System.out.println("average wt is "+ (float)(avgwt/n));
+  
+
+
+	}
+
+	static void fcfs()
+	{
+
+		System.out.println("Enter the no. of processes :");
+		int n= sc.nextInt();
+		int[] burst=new int[n];
+		int[] order=new int[n];
+		int[] wait=new int[n];
+
+		for(int i=1;i<=n;i++)
+		{
+			System.out.print("Enter Burst Time of Process P"+i+" :");
+			burst[i-1]=sc.nextInt();
+
+		}
+
+		System.out.println("Enter Order of Arrival :");
+		for(int i=0;i<n;i++)
+		{
+			order[i]=sc.nextInt();
+
+		}
+		
+		int temp=0;
+		int total=0;
+		System.out.println("Execution Order:");
+		System.out.println("Process \t Burst Time \t Waiting Time");
+		for(int i=0;i<n;i++)
+		{
+			wait[i]=temp;
+			System.out.println("P"+order[i]+"\t\t"+burst[order[i]-1]+"\t\t"+temp);
+			temp += burst[order[i]-1];
+			total += wait[i];
+		}
+		
+
+
+		
+		System.out.print("Average waiting Time : "+(total/n));
+
+	}
+
+
+}
+
+
+15.	Write a program to simulate Memory placement strategies – best fit and worst fit.
+16,17,18,19,20
+
+
+//first fit
+class Ffit
+{
+	static void firstfit(int memsize[],int m,int processSize[],int n)
+	{
+		int allocation[]=new int [n];
+		int temp;
+		
+		for(int i=0;i<allocation.length;i++)
+			allocation[i]=-1;
+				
+
+		for(int i=0;i<n;i++)
+		{
+			for(int j=0;j<m;j++)
+			{
+				if(memsize[j]>=processSize[i])
+				{
+					allocation[i]=j;
+					memsize[j]=processSize[i];
+					break;
+				}
+			}
+		}
+
+		System.out.println("\nProcess No.\tProcess Size\tMemory no.");
+		for (int i=0;i<n;i++)
+		{
+			System.out.print(" " + (i+1) + "\t\t" + processSize[i] + "\t\t");
+			if (allocation[i] != -1)
+				System.out.print(allocation[i] + 1);
+			else
+				System.out.print("Not Allocated");
+			System.out.println();
+		}
+	} 
+
+	public static void main(String [] args)
+	{
+		int memsize[]={100,500,200,300,600};
+		int processSize[]={112,415,215,476};
+		int a=memsize.length;
+		int b=processSize.length;
+		firstfit(memsize,a,processSize,b);
+		
+	}
+
+	
+}
+
+
+//best fit
+
+class Bfit
+{
+	static void bestfit(int memsize[],int m,int processSize[],int n)
+	{
+		int allocation[]=new int [n];
+		int temp;
+		
+		for(int i=0;i<allocation.length;i++)
+			allocation[i]=-1;
+		
+		
+		for(int i=0;i<m;i++)
+		{
+			for(int j=i+1;j<m;j++)
+			{	
+				if(memsize[i]>memsize[j])
+				{				
+					temp=memsize[i];
+					memsize[i]=memsize[j];
+					memsize[j]=temp;
+				}
+			}
+		}		
+
+		for(int i=0;i<n;i++)
+		{
+			for(int j=0;j<m;j++)
+			{
+				if(memsize[j]>=processSize[i])
+				{
+					allocation[i]=j;
+					memsize[j]=processSize[i];
+					break;
+				}
+			}
+		}
+
+		System.out.println("\nProcess No.\tProcess Size\tMemory no.");
+		for (int i=0;i<n;i++)
+		{
+			System.out.print(" " + (i+1) + "\t\t" + processSize[i] + "\t\t");
+			if (allocation[i] != -1)
+				System.out.print(allocation[i] + 1);
+			else
+				System.out.print("Not Allocated");
+			System.out.println();
+		}
+	} 
+
+	public static void main(String [] args)
+	{
+		int memsize[]={100,500,200,300,600};
+		int processSize[]={112,415,215,476};
+		int a=memsize.length;
+		int b=processSize.length;
+		bestfit(memsize,a,processSize,b);
+		
+	}
+
+	
+}
+
+
+//worst fit
+
+class Wfit
+{
+	static void worstfit(int memsize[],int m,int processSize[],int n)
+	{
+		int allocation[]=new int [n];
+		int temp;
+		
+		for(int i=0;i<allocation.length;i++)
+			allocation[i]=-1;
+		
+		
+		for(int i=0;i<m;i++)
+		{
+			for(int j=i+1;j<m;j++)
+			{	
+				if(memsize[i]<memsize[j])
+				{				
+					temp=memsize[i];
+					memsize[i]=memsize[j];
+					memsize[j]=temp;
+				}
+			}
+		}		
+
+		for(int i=0;i<n;i++)
+		{
+			for(int j=0;j<m;j++)
+			{
+				if(memsize[j]>=processSize[i])
+				{
+					allocation[i]=j;
+					memsize[j]=processSize[i];
+					break;
+				}
+			}
+		}
+
+		System.out.println("\nProcess No.\tProcess Size\tMemory no.");
+		for (int i=0;i<n;i++)
+		{
+			System.out.print(" " + (i+1) + "\t\t" + processSize[i] + "\t\t");
+			if (allocation[i] != -1)
+				System.out.print(allocation[i] + 1);
+			else
+				System.out.print("Not Allocated");
+			System.out.println();
+		}
+	} 
+
+	public static void main(String [] args)
+	{
+		int memsize[]={100,500,200,300,600};
+		int processSize[]={112,415,215,476};
+		int a=memsize.length;
+		int b=processSize.length;
+		worstfit(memsize,a,processSize,b);
+		
+	}
+
+	
+}
+
+
+//next fit
+
+// Java program for next fit
+// memory management algorithm
+import java.util.Arrays;
+ 
+public class GFG {
+ 
+// Function to allocate memory to blocks as per Next fit
+// algorithm
+    static void NextFit(int blockSize[], int m, int processSize[], int n) {
+        // Stores block id of the block allocated to a
+        // process
+        int allocation[] = new int[n], j = 0;
+ 
+        // Initially no block is assigned to any process
+        Arrays.fill(allocation, -1);
+ 
+        // pick each process and find suitable blocks
+        // according to its size ad assign to it
+        for (int i = 0; i < n; i++) {
+ 
+            // Do not start from beginning
+            while (j < m) {
+    
+                if (blockSize[j] >= processSize[i]) {
+ 
+                    // allocate block j to p[i] process
+                    allocation[i] = j;
+ 
+                    // Reduce available memory in this block.
+                    blockSize[j] -= processSize[i];
+ 
+                    break;
+                }
+ 
+                // mod m will help in traversing the blocks from
+                // starting block after we reach the end.
+                j = (j + 1) % m;
+            }
+        }
+ 
+        System.out.print("\nProcess No.\tProcess Size\tBlock no.\n");
+        for (int i = 0; i < n; i++) {
+            System.out.print( i + 1 + "\t\t" + processSize[i]
+                    + "\t\t");
+            if (allocation[i] != -1) {
+                System.out.print(allocation[i] + 1);
+            } else {
+                System.out.print("Not Allocated");
+            }
+            System.out.println("");
+        }
+    }
+ 
+// Driver program
+    static public void main(String[] args) {
+        int blockSize[] = {5, 10, 20};
+        int processSize[] = {10, 20, 5};
+        int m = blockSize.length;
+        int n = processSize.length;
+        NextFit(blockSize, m, processSize, n);
+    }
+}
+ 
+21.	Write a program to simulate FIFO Page replacement algorithm.
+
+#include<iostream>
+using namespace std;
+bool is_present(int n,int frame[],int f)
+{
+    int flag=0;
+    for(int i=0;i<f;i++)
+    {
+        if(frame[i]==n)
+        {
+            flag=1;
+            break;
+        }
+    }
+    if(flag==1)
+    return true;
+    else 
+    return false;
+}
+int main()
+{
+    int s;
+    cout<<"Enter the number of pages: ";
+    cin>>s;
+    int sequence[s];
+    cout<<"Enter the name of pages: "<<endl;
+    for(int i=0;i<s;i++)
+    {
+        cin>>sequence[i];
+    }
+    int f;
+    cout<<"Enter the number of frames: ";
+    cin>>f;
+    int faults=f,hits=0,p=0;
+    int frame[f];
+    for(int i=0;i<f;i++)
+    {
+        frame[i]=sequence[i];
+
+    }
+    for(int i=f;i<s;i++)
+    {
+        if(!is_present(sequence[i],frame,f))
+        {
+            if(p<f)
+            {
+                frame[p]=sequence[i];
+                p++;
+            }
+            else
+            {
+                p=0;
+                frame[p]=sequence[i];
+                p++;
+            }
+            faults++;
+
+        }
+        else 
+        
+            hits++;
+    }
+    cout<<"faults: "<<faults<<endl;
+    cout<<"Hits: "<<hits<<endl;
+
+
+    return 0;
+}
+
+
+
+----java----
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+
+
+class Fifo
+{
+    static int pageFaults(int incomingStream[], int n, int frames)
+    {
+        System.out.println("Incoming \t Pages");
+        // Using Hashset to quickly check if a given
+        // incoming stream item in set or not
+        HashSet s = new HashSet<>(frames);
+
+        // Queue created to store pages in FIFO manner
+        // since set will not store order or entry
+        // we will use queue to note order of entry of incoming page
+        Queue queue = new LinkedList<>();
+
+        int page_faults = 0;
+
+        for (int i=0; i < n; i++)
+        {
+            // if set has lesser item than frames
+            if (s.size() < frames)
+            {
+                // If incoming item is not present, add to set
+                if (!s.contains(incomingStream[i]))
+                {
+                    s.add(incomingStream[i]);
+                    page_faults++;
+
+                    // Push the incoming page into the queue
+                    queue.add(incomingStream[i]);
+
+
+                }
+            }
+
+            // If the set is full then we need to do page replacement
+            // in FIFO manner that is remove first item from both
+            // set and queue then insert incoming page
+            else
+            {
+                // If incoming item is not present
+                if (!s.contains(incomingStream[i]))
+                {
+                    // remove the first page from the queue
+                    int val = (int) queue.peek();
+
+                    // remove from queue
+                    queue.poll();
+
+                    // Remove from set
+                    s.remove(val);
+
+                    // insert incoming page to set
+                    s.add(incomingStream[i]);
+
+                    // push incoming page to queue
+                    queue.add(incomingStream[i]);
+                    page_faults++;
+
+
+                }
+            }
+            // printing happens here
+            System.out.print(incomingStream[i] + "\t");
+            System.out.print(queue + " \n");
+        }
+
+
+        return page_faults;
+    }
+
+    public static void main(String args[])
+    {
+        int incomingStream[] = {7, 0, 1, 2, 0 , 3, 0, 4, 2, 3, 0, 3, 2, 1};
+        int frames = 3;
+
+        int len = incomingStream.length;
+        int pageFaults = pageFaults(incomingStream, len, frames);
+        int hit = len - pageFaults;
+
+        System.out.println("Page faults: " + pageFaults);
+        System.out.println("Page fault Ratio: " + (double) pageFaults/len);
+        System.out.println("Hits: " + hit);
+        System.out.println("Hit Ratio : " + (double) hit/len);
+    }
+}
+
+22.	Write a program to simulate optimal Page replacement algorithm.
+
+optimal
+#include<iostream>
+using namespace std;
+bool is_present(int n,int frame[],int f)
+{
+    int flag=0;
+    for(int i=0;i<f;i++)
+    {
+        if(frame[i]==n)
+        {
+            flag=1;
+            break;
+        }
+    }
+    if(flag==1)
+    return true;
+    else 
+    return false;
+}
+int search(int frame[],int f,int sequence[],int s,int j)
+{
+    int flag=0;
+    int min=INT8_MAX;
+    for(int i=0;i<f;i++)
+    {
+        flag=0;
+        for(int k=f;k<j;k++)
+        {
+            if(frame[i]==sequence[k])
+            {
+                flag=1;
+                if(i<min)
+                {
+                    min=i;
+                }
+            }
+        }
+        if(flag==0)
+        {
+            return i;
+        }
+    }
+    return min;
+}
+int main()
+{
+    int s;
+    cout<<"Enter the number of pages: ";
+    cin>>s;
+    
+    int sequence[s];
+    cout<<"Enter the name of pages: "<<endl;
+    for(int i=0;i<s;i++)
+    {
+        cin>>sequence[i];
+    }
+    int f;
+    cout<<"Enter the number of frames: ";
+    cin>>f;
+    int faults=f,hits=0,p=0,max=0;
+    int frame[f];
+    for(int i=0;i<f;i++)
+    {
+        frame[i]=sequence[i];
+
+    }
+    for(int i=f;i<s;i++)
+    {
+        if(!is_present(sequence[i],frame,f))
+        {
+            frame[search(frame,f,sequence,s,i)]=sequence[i];
+            faults++;
+        }
+        else 
+        
+            hits++;
+    }
+    cout<<"faults: "<<faults<<endl;
+    cout<<"Hits: "<<hits<<endl;
+
+
+    return 0;
+}
+
+23.	Write a program to simulate LRU Page replacement algorithm.
+
+lru
+
+#include<iostream>
+using namespace std;
+bool is_present(int n,int frame[],int f)
+{
+    int flag=0;
+    for(int i=0;i<f;i++)
+    {
+        if(frame[i]==n)
+        {
+            flag=1;
+            break;
+        }
+    }
+    if(flag==1)
+    return true;
+    else 
+    return false;
+}
+int list_rank(int frame[],int f)
+{
+    int min=frame[0];
+    int idx=0;
+    for(int i=1;i<f;i++)
+    {
+        if(frame[i]<min)
+        {
+            min=frame[i];
+            idx=i;
+        }
+    }
+    return idx;
+}
+int main()
+{
+    int s;
+    cout<<"Enter the number of pages: ";
+    cin>>s;
+    int sequence[s];
+    cout<<"Enter the name of pages: "<<endl;
+    for(int i=0;i<s;i++)
+    {
+        cin>>sequence[i];
+    }
+    int f;
+    cout<<"Enter the number of frames: ";
+    cin>>f;
+    int faults=f,hits=0,p=0;
+    int frame[f], time[f]={0};
+    for(int i=0;i<f;i++)
+    {
+        frame[i]=sequence[i];
+        time[i]=i;
+        cout<<"time["<<frame[i]<<"]"<<time[i]<<endl;
+    }
+    cout<<endl;
+    for(int i=f;i<s;i++)
+    {
+        if(!is_present(sequence[i],frame,f))
+        {
+            cout<<sequence[i]<<endl;
+            int ret=list_rank(frame,f);
+            cout<<"Function value: "<<ret<<endl;
+            cout<<"Old value at: "<<ret<<" is: "<<frame[ret]<<endl;
+            frame[ret]=sequence[i];
+            time[ret]=time[ret]+1;
+            for(int i=0;i<f;i++)
+            {
+                cout<<"time["<<frame[i]<<"]"<<time[i]<<endl;
+            }
+            cout<<endl;
+            faults++;
+
+        }
+        else 
+        {
+            hits++;
+            for(int j=0;j<f;j++)
+            {
+                if(frame[j]==sequence[i])
+                {
+                    time[j]=time[j]+1;
+                    break;
+                }
+            }
+            for(int i=0;i<f;i++)
+            {
+                cout<<"time["<<frame[i]<<"]"<<time[i]<<endl;
+            }
+            cout<<endl;
+            
+        }
+    }
+    cout<<"faults: "<<faults<<endl;
+    cout<<"Hits: "<<hits<<endl;
+
+
+    return 0;
+}
