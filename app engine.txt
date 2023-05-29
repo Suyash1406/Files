@@ -1,0 +1,12 @@
+curl https://sdk.cloud.google.com | bash
+
+
+gcloud init
+
+after create link click onn it
+
+https://github.com/GoogleCloudPlatform/python-docs-samples”.
+
+cd python-docs-samples/appengine/standard/hello_world”.
+
+dev_appserver.py app.yaml
