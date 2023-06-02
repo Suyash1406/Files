@@ -1,0 +1,26 @@
+
+/*$ sudo apt-add-repository ppa:webupd8team/java
+$ sudo apt-get update
+$ sudo apt-get install oracle-java7-installer
+$ java -version
+$ sudo apt-get install scala
+$ scala –version
+save file= HelloWorld.scala
+run=scalac HelloWorld.scala
+        scala HelloWorld
+  */
+object  HelloWorld {  
+   def main(args: Array[String]) {  
+           println("Hello World")   
+}    
+    
+var Var1 : String = "Disha"
+var Var1 = "Disha"
+println(Var1)
+ var Var4 = 2
+var Var5=34
+println(Var4 + Var5)
+for( a <- 1 to 10){
+println( "Value of a: " + a )
+}
+}
